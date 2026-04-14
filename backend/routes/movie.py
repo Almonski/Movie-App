@@ -23,6 +23,18 @@ def read_movies(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
     movies = db.query(MovieModel).offset(skip).limit(limit).all()
     return movies
 
+# 5. READ ONE (The GET by ID endpoint) - Komplettering för godkänt
+@router.get("/{movie_id}", response_model=Movie)
+def read_movie(movie_id: int, db: Session = Depends(get_db)):
+    # Vi letar efter filmen med matchande ID
+    db_movie = db.query(MovieModel).filter(MovieModel.id == movie_id).first()
+    
+    # Om filmen inte finns (är None), skicka 404 - detta är kravet för godkänt!
+    if db_movie is None:
+        raise HTTPException(status_code=404, detail="Movie not found")
+        
+    return db_movie
+
 # 2. CREATE (The POST endpoint)
 @router.post("/", response_model=Movie)
 def create_movie(movie: MovieCreate, db: Session = Depends(get_db)):
